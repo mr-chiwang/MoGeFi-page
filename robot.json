@@ -1,0 +1,49 @@
+{
+  "methods": [
+    {
+      "id": "human",
+      "label": "Generated human",
+      "subtitle": "Original motion reference"
+    },
+    {
+      "id": "simulated",
+      "label": "SONIC simulation",
+      "subtitle": "Unitree G1"
+    },
+    {
+      "id": "deployed",
+      "label": "Real robot",
+      "subtitle": "Physical Unitree G1"
+    }
+  ],
+  "cases": [
+    {
+      "id": "walk-turn",
+      "label": "Walk then turn",
+      "text": "A person walks forward, then turns around and walks back.",
+      "frames": 151,
+      "fps": 30
+    },
+    {
+      "id": "salute",
+      "label": "Salute",
+      "text": "A person gives a crisp salute with the right hand, holds it briefly, then lowers the arm.",
+      "frames": 135,
+      "fps": 30
+    },
+    {
+      "id": "polite-bow",
+      "label": "Polite bow",
+      "text": "A person makes a polite bow and returns to standing upright.",
+      "frames": 120,
+      "fps": 30
+    },
+    {
+      "id": "disco-turn-360",
+      "label": "Disco step and full turn",
+      "text": "A person performs a disco dance, stepping side to side while alternating one arm overhead, then turns and finishes with both arms wide.",
+      "frames": 331,
+      "fps": 30
+    }
+  ]
+}

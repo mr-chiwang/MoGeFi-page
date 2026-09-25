@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MoGeFi: Learning Geometric Feedback for Few-Step Human Motion Generation</title>
+<meta name="description" content="Few-step text-to-motion generation and sparse joint control with proposal-based geometric feedback. Explore synchronized motion comparisons on HumanML3D.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=clean-layout">
+</head>
+<body>
+<header class="nav"><a class="wordmark" href="#top">MoGeFi</a><nav aria-label="Sections"><a href="#method">Abstract</a><a href="#t2m">Generation</a><a href="#sparse">Control</a><a href="#robot">Deployment</a></nav></header>
+<main id="top">
+<section class="intro">
+
+<h1>MoGeFi: Learning Geometric Feedback for Few-Step Human Motion Generation</h1>
+
+
+<div class="hero-films">
+<figure><video muted playsinline loop preload="auto" poster="assets/posters/t2m-005504-ours.jpg" data-hero aria-label="Text-to-motion: walk, turn, sit, stand and return"><source src="assets/videos/t2m-005504-ours.webm" type="video/webm"><source src="assets/videos/t2m-005504-ours.mp4" type="video/mp4"></video><figcaption><strong>Text-conditioned motion</strong></figcaption></figure>
+<figure><video muted playsinline loop preload="auto" poster="assets/posters/sparse-001759-ours.jpg" data-hero aria-label="Sparse joint control: walk forward and step over a structure"><source src="assets/videos/sparse-001759-ours.webm" type="video/webm"><source src="assets/videos/sparse-001759-ours.mp4" type="video/mp4"></video><figcaption><strong>Sparse joint control</strong></figcaption></figure>
+<figure class="deployment-preview"><video muted playsinline loop preload="auto" poster="assets/posters/robot-walk-turn-deployed.jpg" data-hero aria-label="Physical Unitree G1 walking and turning"><source src="assets/videos/robot-walk-turn-deployed.mp4" type="video/mp4"></video><figcaption><strong>Humanoid deployment</strong></figcaption></figure>
+<button class="hero-pause" aria-label="Pause introduction videos" title="Pause introduction videos">Ⅱ</button>
+</div>
+
+</section>
+<section class="method section" id="method" aria-labelledby="method-heading">
+<h2 id="method-heading">Abstract</h2>
+<p class="abstract">Interactive human motion generation calls for natural, text-aligned movement, accurate geometric control, and low latency. Precise control often relies on costly test-time refinement, while fast generators can leave substantial joint errors. We present MoGeFi, a directly trained framework that combines one- and few-step conditional motion generation with learned geometric feedback. The backbone learns finite-interval updates in motion latent space without diffusion-teacher distillation. Text and structured joint observations interact in a shared Transformer to shape these updates. For controlled synthesis, we introduce proposal-based geometric feedback: a clean-motion proposal predicted from the current latent state is decoded to provide joint geometry for comparison with the targets. This proposal is refreshed at each sampling step, guiding state-dependent corrections to the backbone update. Geometric and representation-space Fréchet objectives supervise the model&#x27;s own short rollouts, training these corrections through their effect on target satisfaction and complete-motion statistics. Inference uses only forward evaluations, with no per-sample optimization. Extensive experiments on HumanML3D demonstrate that MoGeFi combines high motion quality, accurate geometric control, and interactive latency across multiple motion generation tasks. In sparse joint control, it achieves lower FID and roughly halves trajectory and location error rates compared with MaskControl-Fast, while generating each sequence in approximately 61 ms. Ablations show that explicit geometric feedback and per-step proposal refresh improve constraint satisfaction. We also execute generated motions on a physical humanoid using an existing motion tracker.</p>
+<figure class="framework"><a class="framework-link" href="assets/framework.pdf" target="_blank" rel="noopener" aria-label="Open full-size framework diagram"><img src="assets/framework.png" alt="Overall architecture of MoGeFi" loading="lazy" width="2400"></a><figcaption><strong>Overall architecture of MoGeFi.</strong> Few-step generation with proposal-based geometric feedback, conditioned on <span class="math">𝒞 = (c, 𝒪, ω)</span>. Motion and condition tokens interact in the conditional motion backbone. A frozen clean-motion observer predicts a clean-motion proposal; its geometry relative to the joint targets provides context for a feedback controller that corrects the base average velocity. Each update produces <span class="math"><b>s</b><sub>k+1</sub></span>, which becomes the current state in the next iteration; the final state <span class="math"><b>s</b><sub>K</sub></span> is decoded after <i>K</i> steps. Dashed branches show training supervision: <span class="math">ℒ<sub>flow</sub></span> and <span class="math">ℒ<sub>geo</sub><sup>int</sup></span> use interpolant evaluations, while <span class="math">ℒ<sub>geo</sub><sup>roll</sup></span> and <span class="math">ℒ<sub>FD</sub></span> supervise complete rollouts. Snowflakes mark frozen parameters; the observer proposal is detached during training.</figcaption></figure>
+</section>
+<section class="showcase section" id="t2m" aria-labelledby="t2m-heading">
+<div class="section-heading"><h2 id="t2m-heading">Text-to-motion generation</h2></div>
+<div class="case-tabs" role="tablist" aria-label="Text-to-motion examples"></div>
+<div class="example" role="tabpanel"><div class="prompt-row"><p class="prompt"></p></div><div class="video-grid"></div><div class="transport"><button class="play" aria-label="Play synchronized text-to-motion videos">▶ <span>Play all</span></button><button class="restart" aria-label="Restart text-to-motion videos">↺</button><label class="timeline-label"><span class="sr-only">Text-to-motion timeline</span><input class="timeline" type="range" min="0" max="1" step="0.05" value="0"></label><output class="time">0.00 / 0.00 s</output><label class="speed-label"><span class="sr-only">Playback speed</span><select class="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option></select></label></div><p class="example-note">Ours: 2 sampling steps. Real: dataset reference.</p></div>
+</section>
+<section class="showcase section" id="sparse" aria-labelledby="sparse-heading">
+<div class="section-heading"><h2 id="sparse-heading">Sparse joint control</h2></div>
+<div class="case-tabs" role="tablist" aria-label="Sparse control examples"></div>
+<div class="example" role="tabpanel"><div class="prompt-row"><p class="prompt"></p></div><div class="control-row"><p class="control-info"></p><div class="legend"><span><i class="target-symbol"></i>Control target</span><span><i class="trajectory-symbol"></i>Generated controlled-joint trajectory</span></div></div><div class="video-grid"></div><div class="transport"><button class="play" aria-label="Play synchronized joint-control videos">▶ <span>Play all</span></button><button class="restart" aria-label="Restart joint-control videos">↺</button><label class="timeline-label"><span class="sr-only">Joint-control timeline</span><input class="timeline" type="range" min="0" max="1" step="0.05" value="0"></label><output class="time">0.00 / 0.00 s</output><label class="speed-label"><span class="sr-only">Playback speed</span><select class="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option></select></label></div><p class="example-note">All methods receive the same control targets. Red timeline ticks mark the target frames.</p></div>
+</section>
+<section class="robot section" id="robot" aria-labelledby="robot-heading">
+<div class="section-heading"><h2 id="robot-heading">Real-robot deployment</h2></div>
+<div class="case-tabs robot-tabs" role="tablist" aria-label="Robot demonstrations"></div>
+<div class="example" role="tabpanel"><div class="prompt-row"><p class="prompt"></p></div><div class="video-grid"></div><div class="transport"><button class="play" aria-label="Play robot demonstration">▶ <span>Play all</span></button><button class="restart" aria-label="Restart robot demonstration">↺</button><label class="timeline-label"><span class="sr-only">Demonstration timeline</span><input class="timeline" type="range" min="0" max="1" step="0.0333" value="0"></label><output class="time">0.00 / 0.00 s</output><label class="speed-label"><span class="sr-only">Playback speed</span><select class="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option></select></label></div><p class="example-note">Human references, SONIC simulation, and physical Unitree G1 execution. Independently recorded sequences are aligned by action phase.</p></div>
+</section>
+
+
+</main><dialog class="motion-dialog" aria-labelledby="detail-title"><div class="detail-header"><strong id="detail-title"></strong><button class="detail-close" aria-label="Close enlarged video">Close ×</button></div><div class="detail-video"></div><p class="detail-prompt"></p></dialog><script type="module" src="app.js?v=quick-sync"></script>
+</body></html>
