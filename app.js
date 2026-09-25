@@ -1,5 +1,44 @@
 const data = JSON.parse(document.getElementById('motion-data').textContent);
 const players = [];
+// Retain the actual media elements so cached samples also work in sandboxed hosting.
+const videoPool = new Map();
+function sampleVideo(task, item, method) {
+  const key = `${task}-${item.id}-${method.id}`;
+  if (!videoPool.has(key)) {
+    const video = document.createElement('video');
+    video.muted = true; video.playsInline = true; video.preload = 'auto';
+    for (const extension of (task === 'robot' ? ['mp4'] : ['webm', 'mp4'])) {
+      const source = document.createElement('source');
+      source.src = `assets/videos/${key}.${extension}`; source.type = `video/${extension}`;
+      video.append(source);
+    }
+    video.poster = `assets/posters/${key}.jpg`;
+    videoPool.set(key, video);
+  }
+  return videoPool.get(key);
+}
+function bufferedForPlayback(video) {
+  return Boolean(video.error) || video.readyState >= 4;
+}
+async function preloadRemainingSamples() {
+  const sleep = () => new Promise(resolve => setTimeout(resolve, 500));
+  for (const player of players) {
+    for (const item of player.config.cases) {
+      for (const method of player.config.methods) {
+        // Visible selections always take priority over the one-file background queue.
+        while (![...heroes, ...players.flatMap(p => p.videos)].every(bufferedForPlayback)) await sleep();
+        const video = sampleVideo(player.task, item, method);
+        if (bufferedForPlayback(video)) continue;
+        video.preload = 'auto';
+        if (video.networkState === 0) video.load();
+        // A failed/stalled background request must not block every later sample.
+        const started = Date.now();
+        while (!bufferedForPlayback(video) && Date.now() - started < 30000) await sleep();
+        if (!bufferedForPlayback(video) && !video.isConnected) video.preload = 'none';
+      }
+    }
+  }
+}
 const detail = document.querySelector('.motion-dialog');
 let detailSource = null;
 function openDetail(player, method, source) {
@@ -113,26 +152,24 @@ class MotionComparison {
     const grid = this.root.querySelector('.video-grid');
     grid.style.gridTemplateColumns = `repeat(${this.config.methods.length}, minmax(0,1fr))`;
     grid.style.maxWidth = this.config.methods.length === 1 ? '640px' : ''; grid.style.marginInline = 'auto';
-    this.videos?.forEach(v => { v.replaceChildren(); v.removeAttribute('src'); v.load(); }); grid.replaceChildren();
+    this.videos?.forEach(v => { v.onended = null; v.onerror = null; v.onwaiting = null; }); grid.replaceChildren();
     this.videos = this.config.methods.map(method => {
       const panel = document.createElement('article'); panel.className = `video-panel ${method.id}`;
       const head = document.createElement('header'); const name = document.createElement('strong'); name.textContent = method.label;
       const timing = document.createElement('small'); timing.textContent = method.subtitle ?? (method.id === 'real' ? 'Dataset reference' : `AITS: ${this.config.aits[method.id]} s`);
       if (!method.subtitle) { timing.title = 'Average inference time per sentence'; head.append(name, timing); } else head.append(name);
       const expand = document.createElement('button'); expand.className = 'expand-video'; expand.textContent = '⤢'; expand.setAttribute('aria-label', `Enlarge ${method.label} video`); head.append(expand);
-      const v = document.createElement('video'); v.muted = true; v.playsInline = true; v.preload = 'auto';
-      for (const extension of (this.task === 'robot' ? ['mp4'] : ['webm','mp4'])) { const source = document.createElement('source'); source.src = `assets/videos/${this.task}-${this.case.id}-${method.id}.${extension}`; source.type = `video/${extension}`; v.append(source); }
-      v.poster = `assets/posters/${this.task}-${this.case.id}-${method.id}.jpg`;
+      const v = sampleVideo(this.task, this.case, method); v.preload = 'auto';
       v.setAttribute('aria-label', `${method.label}: ${this.case.text}`);
       v.playbackRate = Number(this.speed.value);
-      v.addEventListener('error', () => { this.pause(); if (!panel.querySelector('.media-error')) { const note = document.createElement('p'); note.className = 'media-error'; note.textContent = 'Video could not load. Reload the page to retry.'; panel.append(note); } });
-      v.addEventListener('waiting', () => this.resync());
+      v.onerror = () => { this.pause(); if (!panel.querySelector('.media-error')) { const note = document.createElement('p'); note.className = 'media-error'; note.textContent = 'Video could not load. Reload the page to retry.'; panel.append(note); } };
+      v.onwaiting = () => this.resync();
       expand.addEventListener('click', () => openDetail(this, method, v));
       panel.append(head, v); grid.append(panel); return v;
     });
     this.master = this.videos[0];
-    this.master.addEventListener('ended', () => { const resume = this.playing; this.pause(); this.seek(0); if (resume) this.play(); });
-    this.update(0);
+    this.master.onended = () => { const resume = this.playing; this.pause(); this.seek(0); if (resume) this.play(); };
+    this.seek(0);
   }
   async play() {
     players.forEach(p => { if (p !== this) p.pause(); }); stopHeroes();
@@ -195,3 +232,5 @@ class MotionComparison {
 }
 for (const task of ['t2m','sparse','robot']) players.push(new MotionComparison(task, data[task]));
 document.addEventListener('visibilitychange', () => { if (document.hidden) { players.forEach(p => p.pause()); stopHeroes(); } });
+
+preloadRemainingSamples();
