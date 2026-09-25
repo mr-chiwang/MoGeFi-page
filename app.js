@@ -61,6 +61,31 @@ class MotionComparison {
       tabs.append(tab);
     });
     this.root.querySelector('.example').id = `${task}-panel`;
+    const example = this.root.querySelector('.example');
+    const fullscreen = document.createElement('button');
+    fullscreen.type = 'button'; fullscreen.className = 'expand-comparison';
+    const updateFullscreen = () => {
+      const expanded = document.fullscreenElement === example || example.classList.contains('comparison-expanded');
+      fullscreen.textContent = expanded ? 'Exit full screen' : '⤢ Full screen';
+      fullscreen.setAttribute('aria-label', `${expanded ? 'Exit' : 'Enter'} full-screen ${task === 't2m' ? 'text-to-motion' : task === 'sparse' ? 'joint-control' : 'robot'} comparison`);
+      fullscreen.setAttribute('aria-pressed', String(expanded));
+    };
+    fullscreen.addEventListener('click', async () => {
+      if (document.fullscreenElement === example) await document.exitFullscreen();
+      else if (example.classList.contains('comparison-expanded')) example.classList.remove('comparison-expanded');
+      else {
+        try { await example.requestFullscreen(); }
+        catch { example.classList.add('comparison-expanded'); }
+      }
+      updateFullscreen();
+    });
+    document.addEventListener('fullscreenchange', updateFullscreen);
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && example.classList.contains('comparison-expanded')) {
+        example.classList.remove('comparison-expanded'); updateFullscreen(); fullscreen.focus();
+      }
+    });
+    this.root.querySelector('.transport').append(fullscreen); updateFullscreen();
     this.playButton.addEventListener('click', () => this.playing ? this.pause() : this.play());
     this.root.querySelector('.restart').addEventListener('click', () => { this.seek(0); });
     this.timeline.addEventListener('pointerdown', () => { this.wasPlaying = this.playing; this.pause(); });
