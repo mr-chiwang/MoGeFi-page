@@ -2,7 +2,7 @@
 
 Static project page for **MoGeFi: Learning Geometric Feedback for Few-Step Human Motion Generation**.
 
-This branch contains the website only. The manuscript remains on `main`.
+This repository contains only the project website and its media assets.
 
 ## Preview and edit
 
@@ -14,7 +14,7 @@ python3 -m http.server 8765
 
 Open http://localhost:8765. Edit `index.html`, `style.css`, and `app.js`; example metadata lives in `data.json` and `robot.json`. Images, diagrams, and videos are in `assets/`.
 
-The page uses relative URLs and can be hosted from a repository subdirectory. To publish with GitHub Pages, select this branch and `/ (root)` in the repository Pages settings. Creating this branch does not enable GitHub Pages automatically.
+The page uses relative URLs and can be hosted from a repository subdirectory. GitHub Pages publishes the `main` branch from `/ (root)`.
 
 ## Contents
 
