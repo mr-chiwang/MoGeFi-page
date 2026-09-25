@@ -1,6 +1,5 @@
-const data = await fetch('data.json').then(r => { if (!r.ok) throw new Error('Could not load motion examples'); return r.json(); });
+const data = JSON.parse(document.getElementById('motion-data').textContent);
 const players = [];
-data.robot = await fetch('robot.json').then(r => r.json());
 const detail = document.querySelector('.motion-dialog');
 let detailSource = null;
 function openDetail(player, method, source) {

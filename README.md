@@ -12,7 +12,7 @@ No build step is required. Run from this directory:
 python3 -m http.server 8765
 ```
 
-Open http://localhost:8765. Edit `index.html`, `style.css`, and `app.js`; example metadata lives in `data.json` and `robot.json`. Images, diagrams, and videos are in `assets/`.
+Open http://localhost:8765. Edit `index.html`, `style.css`, and `app.js`; example metadata lives in the `motion-data` JSON block in `index.html`. Images, diagrams, and videos are in `assets/`.
 
 The page uses relative URLs and can be hosted from a repository subdirectory. GitHub Pages publishes the `main` branch from `/ (root)`.
 
